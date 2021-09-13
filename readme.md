@@ -1,0 +1,1 @@
+Small script to purchase specified amounts of crypto assets on execution. Automate with cron job for dollar-cost averaging.
