@@ -9,7 +9,12 @@ class CoinbaseExchangeAuth(AuthBase):
 
     def __call__(self, request):
         timestamp = str(time.time())
-        message = timestamp + request.method + request.path_url + (request.body or b'').decode()
+        request_body = request.body
+        try:
+            request_body = request_body.decode()
+        except (UnicodeDecodeError, AttributeError):
+            pass
+        message = timestamp + request.method + request.path_url + (request_body or '')
         hmac_key = base64.b64decode(self.secret_key)
         signature = hmac.new(hmac_key, message.encode(), hashlib.sha256)
         signature_b64 = base64.b64encode(signature.digest()).decode()

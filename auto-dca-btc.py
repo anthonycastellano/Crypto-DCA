@@ -35,7 +35,7 @@ print('BTC Price (USD): $' + btc_price)
 
 # purchase amount
 amount_to_purchase = round(float(BTC_PURC_AMT) / float(btc_price), 8)
-print('Trading $' + BTC_PURC_AMT + ' of USD for ' + str(amount_to_purchase) + ' BTC')
+print('Trading ' + BTC_PURC_AMT + ' USD for ' + str(amount_to_purchase) + ' BTC')
 
 # post order
 payload = {
@@ -44,25 +44,36 @@ payload = {
     'product_id': 'BTC-USD',
     'size': amount_to_purchase
 }
-r = requests.post(api_url + 'orders', params=payload)
+print("Placing order...")
+r = requests.post(api_url + 'orders', json=payload, auth=auth)
 res_json = r.json()
-orderDetails = {
-    'id': res_json['id'],
+print(res_json)
+order_id = res_json['id']
+
+# fetch order status
+payload = {
+    'order_id': order_id
+}
+not_settled = True
+while not_settled:
+    r = requests.get(api_url + 'fills/', params=payload, auth=auth)
+    res_json = r.json()
+    settled = res_json['settled']
+
+# print details
+order_details = {
     'price': res_json['price'],
     'size': res_json['size'],
-    'status': res_json['status'],
-    'fill_fees': res_json['fill_fees'],
+    'fee': res_json['fee'],
     'created_at': res_json['created_at']
 }
-print('Order submitted:\n\tid:\t' + orderDetails['id']
-        + '\n\tprice:\t' + orderDetails['price']
-        + '\n\tsize:\t' + orderDetails['size']
-        + '\n\tstatus:\t' + orderDetails['status']
-        + '\n\tfees:\t' + orderDetails['fill_fees']
-        + '\n\tcreated at:\t' + orderDetails['created_at'])
+print('Order filled:\n\tsprice:\t' + order_details['price']
+        + '\n\tsize:\t' + order_details['size']
+        + '\n\tfees:\t' + order_details['fee']
+        + '\n\tcreated at:\t' + order_details['created_at'])
 
 # write to csv file
-row = [orderDetails['created_at'], 'BTC', orderDetails['price'], orderDetails['size'], orderDetails['fill_fees']]
+row = [order_details['created_at'], 'BTC', order_details['price'], order_details['size'], order_details['fee']]
 with open('orders.csv', 'a') as file:
     writer = csv.writer(file)
     writer.writerow(row)
