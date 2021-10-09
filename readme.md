@@ -1,1 +1,1 @@
-Small script to purchase specified amounts of crypto assets on execution. Automate with cron job for dollar-cost averaging.
+Small python script to purchase specified amounts of crypto assets on execution. Automate with cron job for dollar-cost averaging. Environment properties stored in .env (API key, secret, passphrase, purchase amounts, etc.)
